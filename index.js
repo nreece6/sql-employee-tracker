@@ -2,6 +2,7 @@ const mysql = require('mysql2')
 const inquirer = require('inquirer')
 require('console.table')
 
+//object containing initial prompt questions
 const promptMessages = {
     viewAllEmployees: 'View All Employees',
     viewByDepartment: 'View All Employees By Department',
@@ -14,6 +15,7 @@ const promptMessages = {
     exit: 'Exit'
 }
 
+// creates connection to database
 const db = mysql.createConnection({
     host: 'localhost',
     port: 3001,
@@ -26,13 +28,13 @@ db.connect(err => {
     if (err) throw err
     prompt()
 })
-
+// initial prompt - creates home screen of options and runs different functions depending on user selections
 function prompt() {
     inquirer
         .prompt({
             name: 'action',
             type: 'list',
-            message: 'What would you like to do?',
+            message: 'Welcome to the Employee Tracker.',
             choices: [
                 promptMessages.viewAllEmployees,
                 promptMessages.viewByDepartment,
@@ -82,7 +84,7 @@ function prompt() {
         })
 }
 
-
+// TODO: write functions to handle new prompts based on user selections or call tables that user wants to see
 function viewAllEmployees() {
     
 }
