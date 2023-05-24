@@ -1,0 +1,17 @@
+{
+    "name": "sql-employee-tracker",
+    "version": "1.0.0",
+    "description": "interface to allow users to interact with employee information stored in databases",
+    "main": "index.js",
+    "scripts": {
+      "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "Nick Reece",
+    "license": "ISC",
+    "dependencies": {
+        "inquirer": "^8.2.4",
+        "mysql2": "^3.3.2",
+        "console.table": "0.10.0"
+    } 
+}
+  
