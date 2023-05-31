@@ -18,7 +18,7 @@ const promptMessages = {
 // creates connection to database
 const db = mysql.createConnection({
     host: 'localhost',
-    port: 3001,
+    port: 3306,
     user: 'root',
     password: '',
     database: 'employees_db'
@@ -84,7 +84,9 @@ function prompt() {
         })
 }
 
-// TODO: write functions to handle new prompts based on user selections or call tables that user wants to see
+// Functions to handle user selections. Additional prompts added dependent on user selections
+
+// Function to view all employees in db
 function viewAllEmployees() {
     const query = `SELECT employee.id, employee.first_name, employee.last_name, role.title, department.name AS department, role.salary, CONCAT(manager.first_name, ' ', manager.last_name) AS manager
     FROM employee
@@ -98,9 +100,12 @@ function viewAllEmployees() {
         console.log('VIEW ALL EMPLOYEES')
         console.log('\n')
         console.table(res)
-        prompt();
+        prompt()
     })
 }
+
+// Function to show all employees broken down by department
+
 function viewByDepartment() {
     const query = `SELECT department.name AS department, role.title, employee.id, employee.first_name, employee.last_name
     FROM employee
@@ -116,6 +121,9 @@ function viewByDepartment() {
         prompt()
     })
 }
+
+// Function to show all employees broken down by manager
+
 function viewByManager() {
     const query = `SELECT CONCAT(manager.first_name, ' ', manager.last_name) AS manager, department.name AS department, employee.id, employee.first_name, employee.last_name, role.title
     FROM employee
@@ -132,6 +140,9 @@ function viewByManager() {
         prompt()
     })
 }
+
+// Function to handle adding a new employee - new prompts created for user to select roles, managers after user inputs employee name
+
 async function addEmployee() {
     const addname = await inquirer.prompt(askName())
     db.query('SELECT role.id, role.title FROM role ORDER BY role.id;', async (err, res) => {
@@ -193,10 +204,12 @@ async function addEmployee() {
                     prompt()
 
                 }
-            );
-        });
-    });
+            )
+        })
+    })
 }
+
+// Function handles deleting employees or updating role.
 function remove(input) {
     const promptQ = {
         yes: "yes",
@@ -206,25 +219,23 @@ function remove(input) {
         {
             name: "action",
             type: "list",
-            message: "In order to proceed an employee, an ID must be entered. View all employees to get" +
-                " the employee ID. Do you know the employee ID?",
+            message: "In order to proceed an employee ID must be entered. Do you know the ID for the employee?",
             choices: [promptQ.yes, promptQ.no]
         }
     ]).then(answer => {
-        if (input === 'delete' && answer.action === "yes") removeEmployee();
-        else if (input === 'role' && answer.action === "yes") updateRole();
-        else viewAllEmployees();
-
-
-
-    });
+        if (input === 'delete' && answer.action === "yes") removeEmployee()
+        else if (input === 'role' && answer.action === "yes") updateRole()
+        else viewAllEmployees()
+    })
 }
+
+// Function to handle removing employee from db
 
 async function removeEmployee() {
 
     const answer = await inquirer.prompt([
         {
-            name: "first",
+            name: "eID",
             type: "input",
             message: "Enter the employee ID you want to remove:  "
         }
@@ -232,16 +243,79 @@ async function removeEmployee() {
 
     db.query('DELETE FROM employee WHERE ?',
         {
-            id: answer.first
+            id: answer.name
         },
         function (err) {
-            if (err) throw err;
+            if (err) throw err
         }
     )
-    console.log('Employee has been removed on the system!');
-    prompt();
+    console.log('Employee has been removed on the system!')
+    prompt()
 
-};
+}
+
+// Helper prompt - future development needed to integrate this helper into other functions
+
+function askId() {
+    return ([
+        {
+            name: "name",
+            type: "input",
+            message: "What is the employe ID?:  "
+        }
+    ])
+}
+
+// Function to handle changing employee roles
+
+async function updateRole() {
+    const employeeId = await inquirer.prompt(askId());
+
+    db.query('SELECT role.id, role.title FROM role ORDER BY role.id;', async (err, res) => {
+        if (err) throw err
+        const { role } = await inquirer.prompt([
+            {
+                name: 'role',
+                type: 'list',
+                choices: () => res.map(res => res.title),
+                message: 'What is the new employee role?: '
+            }
+        ]);
+        let roleId
+        for (const row of res) {
+            if (row.title === role) {
+                roleId = row.id
+                continue
+            }
+        }
+        db.query(`UPDATE employee 
+        SET role_id = ${roleId}
+        WHERE employee.id = ${employeeId.name}`, async (err, res) => {
+            if (err) throw err
+            console.log('Role has been updated..')
+            prompt()
+        })
+    })
+}
+
+// Function to ask employees names
+
+function askName() {
+    return ([
+        {
+            name: "first",
+            type: "input",
+            message: "Enter the first name: "
+        },
+        {
+            name: "last",
+            type: "input",
+            message: "Enter the last name: "
+        }
+    ])
+}
+
+// Function to handle viewing all employee roles
 
 function viewAllRoles() {
     const query = `SELECT role.title, employee.id, employee.first_name, employee.last_name, department.name AS department
@@ -255,7 +329,7 @@ function viewAllRoles() {
         console.log('VIEW EMPLOYEE BY ROLE')
         console.log('\n')
         console.table(res)
-        prompt();
-    });
+        prompt()
+    })
 }
 
