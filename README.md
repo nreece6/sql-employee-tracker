@@ -33,6 +33,7 @@ npm install
 In your shell to install all necessary dependencies.
 
 Once you have the repo location open in your terminal, run the program with 
+
 ```
 node index.js
  ``` 
