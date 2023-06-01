@@ -27,7 +27,6 @@ To install this application, navigate to the repo on my github account https://g
 
 ```
 npm install
-
 ```
 
 In your shell to install all necessary dependencies.
